@@ -24,6 +24,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 public class RemoteControl {
 
 	private JFrame frmRemotecontrol;
@@ -42,6 +45,10 @@ public class RemoteControl {
 	private JComboBox comboBoxSettingsUsermode;
 	private JComboBox comboBoxSettingsAspectratio;
 	private JTable tableRemoteControlChannellist;
+	private JButton btnRemoteControlVolumeMute;
+	private JButton btnRemoteControlVolumeDown;
+	private JSlider sliderRemoteControlVolume;
+	private JButton btnRemoteControlVolumeUp;
 
 	/**
 	 * Launch the application.
@@ -63,8 +70,8 @@ public class RemoteControl {
 	 * Create the application.
 	 */
 	public RemoteControl() {
-		screen = new Screen();
-		electronics = new TvElectronics(screen.getScreen(), screen.getPiPScreen());
+		screen = new Screen(this);
+		electronics = new TvElectronics(screen, this);
 		config = new PersistentConfig();
 		channel = new PersistentChannel(electronics);
 		initialize();
@@ -127,24 +134,24 @@ public class RemoteControl {
 		tableRemoteControlChannellist.setModel(new ChannelTableModelList(channel.getChannelList()));
 		formatTable();
 
-		JButton btnRemoteControlVolumeMute = new JButton("Mute");
+		btnRemoteControlVolumeMute = new JButton("Mute");
 		btnRemoteControlVolumeMute.setEnabled(false);
 		btnRemoteControlVolumeMute.setToolTipText("Mute Volume");
 		btnRemoteControlVolumeMute.setBounds(10, 518, 25, 25);
 		panelRemoteControl.add(btnRemoteControlVolumeMute);
 
-		JButton btnRemoteControlVolumeDown = new JButton("V-");
+		btnRemoteControlVolumeDown = new JButton("V-");
 		btnRemoteControlVolumeDown.setEnabled(false);
 		btnRemoteControlVolumeDown.setToolTipText("Decrease Volume");
 		btnRemoteControlVolumeDown.setBounds(45, 518, 25, 25);
 		panelRemoteControl.add(btnRemoteControlVolumeDown);
 
-		final JSlider sliderRemoteControlVolume = new JSlider();
+		sliderRemoteControlVolume = new JSlider();
 		sliderRemoteControlVolume.setEnabled(false);
 		sliderRemoteControlVolume.setBounds(80, 518, 235, 23);
 		panelRemoteControl.add(sliderRemoteControlVolume);
 
-		JButton btnRemoteControlVolumeUp = new JButton("V+");
+		btnRemoteControlVolumeUp = new JButton("V+");
 		btnRemoteControlVolumeUp.setEnabled(false);
 		btnRemoteControlVolumeUp.setToolTipText("Increase Volume");
 		btnRemoteControlVolumeUp.setBounds(325, 518, 25, 25);
@@ -182,10 +189,98 @@ public class RemoteControl {
 			}
 		});
 
+		btnRemoteControlPiPActivate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (screen.pipIsVisible()) {
+					electronics.setPictureInPicture(false);
+					tglbtnRemoteControlPiPSwitch.setEnabled(false);
+					tglbtnRemoteControlPiPSwitch.setSelected(false);
+				} else {
+					electronics.setPictureInPicture(true);
+					tglbtnRemoteControlPiPSwitch.setEnabled(true);
+					tglbtnRemoteControlPiPSwitch.setSelected(true);
+				}
+			}
+		});
+
+		btnRemoteControlPower.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (screen.isVisible()) {
+					screen.setVisible(false);
+					screenON(false);
+				} else {
+					try {
+						electronics.setChannel(channel.getChannelList().get(config.getProgramm()).getChannel(),
+								false,
+								channel.getChannelList().get(config.getProgramm()).getChannelPicturePath());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					screen.setVisible(true);
+					screenON(true);
+				}
+
+			}
+		});
+
+		tableRemoteControlChannellist.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent event) {
+				if (event.getClickCount() == 2) {
+					try {
+						electronics.setChannel(channel.getChannelList().get(tableRemoteControlChannellist.getSelectedRow()).getChannel(),
+								tglbtnRemoteControlPiPSwitch.isSelected(),
+								channel.getChannelList().get(tableRemoteControlChannellist.getSelectedRow()).getChannelPicturePath());
+						if (config.getRatio() >= 1) {
+							electronics.setZoom(true);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+
+		btnRemoteControlVolumeMute.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					sliderRemoteControlVolume.setValue(0);
+					electronics.setVolume(0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		btnRemoteControlVolumeDown.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					if (sliderRemoteControlVolume.getValue() - 1 >= 0) {
+						sliderRemoteControlVolume.setValue(sliderRemoteControlVolume.getValue() - 1);
+						electronics.setVolume(sliderRemoteControlVolume.getValue() - 1);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
 		sliderRemoteControlVolume.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				try {
 					electronics.setVolume(sliderRemoteControlVolume.getValue());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		btnRemoteControlVolumeUp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					if (sliderRemoteControlVolume.getValue() + 1 <= 100) {
+						sliderRemoteControlVolume.setValue(sliderRemoteControlVolume.getValue() + 1);
+						electronics.setVolume(sliderRemoteControlVolume.getValue() + 1);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -255,7 +350,7 @@ public class RemoteControl {
 				btnSettingsCancel.setEnabled(false);
 				progressBarSettingsChannelscan.setIndeterminate(true);
 				channel.scanChannel();
-				// TODO model aktualisieren
+				tableRemoteControlChannellist.setModel(new ChannelTableModelList(channel.getChannelList()));
 				btnSettingsSave.setEnabled(true);
 				btnSettingsChannelscan.setEnabled(true);
 				btnSettingsCancel.setEnabled(true);
@@ -274,11 +369,10 @@ public class RemoteControl {
 			public void actionPerformed(ActionEvent e) {
 				saveSettings();
 				updateUsermodeLayout();
-				// TODO Zoom
-				// if (config.getRatio() != 0)
-				// electronics.setZoom(true);
-				// else
-				// electronics.setZoom(false);
+				if (config.getRatio() >= 1)
+					electronics.setZoom(true);
+				else
+					electronics.setZoom(false);
 				panelRemoteSettings.setVisible(false);
 				panelRemoteControl.setVisible(true);
 			}
@@ -316,13 +410,40 @@ public class RemoteControl {
 		}
 	}
 
+	private void screenON(boolean on) {
+		btnRemoteControlPiPActivate.setEnabled(on);
+		btnRemoteControlVolumeMute.setEnabled(on);
+		btnRemoteControlVolumeDown.setEnabled(on);
+		sliderRemoteControlVolume.setEnabled(on);
+		btnRemoteControlVolumeUp.setEnabled(on);
+		btnRemoteControlTimeshiftStop.setEnabled(on);
+		btnRemoteControlTimeshiftStart.setEnabled(on);
+		btnRemoteControlTimeshiftFastforward.setEnabled(on);
+
+	}
+
 	private void formatTable() {
 		tableRemoteControlChannellist.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		tableRemoteControlChannellist.setAutoCreateRowSorter(true);
 		tableRemoteControlChannellist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tableRemoteControlChannellist.setRowSelectionInterval(0, 0);
+		tableRemoteControlChannellist.setRowSelectionInterval(0, config.getProgramm());
 		tableRemoteControlChannellist.getColumnModel().getColumn(0).setPreferredWidth(70);
 		tableRemoteControlChannellist.setRowHeight(31);
 		tableRemoteControlChannellist.getColumnModel().getColumn(1).setPreferredWidth(250);
+	}
+
+	public PersistentConfig getConfig() {
+		return config;
+	}
+
+	public TvElectronics getElectronics() {
+		return electronics;
+	}
+
+	public PersistentChannel getChannel() {
+		return channel;
+	}
+
+	public int getSelectedChannel() {
+		return tableRemoteControlChannellist.getSelectedRow();
 	}
 }

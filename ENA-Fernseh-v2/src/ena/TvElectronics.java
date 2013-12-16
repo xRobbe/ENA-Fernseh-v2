@@ -20,6 +20,8 @@ public class TvElectronics {
 
 	protected JPanel mainDisplay;
 	protected JPanel pipDisplay;
+	private Screen screen;
+	private RemoteControl remote;
 	private boolean isRecording; // der TimeShift-Recorder nimmt momentan auf
 	private long recordingStartTime; // zu diesem Zeitpunkt hat die
 										// TimeShift-Aufnahme begonnen (in
@@ -34,9 +36,11 @@ public class TvElectronics {
 	 * @param pipDisplay
 	 *            dieses Panel repräsentiert das PictureInPicture-Display
 	 */
-	TvElectronics(JPanel mainDisplay, JPanel pipDisplay) {
-		this.mainDisplay = mainDisplay;
-		this.pipDisplay = pipDisplay;
+	TvElectronics(Screen screen, RemoteControl remote) {
+		this.remote = remote;
+		this.screen = screen;
+		this.mainDisplay = screen.getScreen();
+		this.pipDisplay = screen.getPiPScreen();
 		this.isRecording = false;
 		this.recordingStartTime = 0;
 	}
@@ -85,7 +89,7 @@ public class TvElectronics {
 	 * @throws Exception
 	 *             wenn der Wert von "channel" nicht gültig ist
 	 */
-	public void setChannel(String channel, boolean forPiP) throws Exception {
+	public void setChannel(String channel, boolean forPiP, String picturePath) throws Exception {
 		String errmsg = "Illegal format for channel: " + channel;
 		int channelNumber;
 		try {
@@ -98,11 +102,8 @@ public class TvElectronics {
 			throw new Exception(errmsg);
 		System.out.println((forPiP ? "PiP" : "Main") + " channel = " + channel);
 
-		// TO DO (Aufgabe 4): Schalten Sie hier verschiedene statische Bilder
-		// für die verschiedenen Kanäle
-		// im jeweiligen Display!
-		// Die meisten Bilder sollen im Format 16:9 sein, ein paar auch in 4:3
-		// und in 2,35:1
+		screen.setChannelPicture(picturePath, forPiP);
+		remote.getConfig().setProgramm(remote.getSelectedChannel());
 
 	}
 
@@ -134,10 +135,10 @@ public class TvElectronics {
 	 */
 	public void setZoom(boolean on) {
 		System.out.println("Zoom = " + (on ? "133%" : "100%"));
-
-		// TO DO (Aufgabe 4): Vergrößern Sie hier das aktuelle Bild des
-		// Main-Display, abhängig von "on"!
-
+		if (on)
+			screen.setChannelPicture(remote.getChannel().getChannelList().get(remote.getSelectedChannel()).getChannelPicturePath(), false, on);
+		else
+			screen.setChannelPicture(remote.getChannel().getChannelList().get(remote.getSelectedChannel()).getChannelPicturePath(), false, on);
 	}
 
 	/**
@@ -149,10 +150,7 @@ public class TvElectronics {
 	 */
 	public void setPictureInPicture(boolean show) {
 		System.out.println("PiP = " + (show ? "visible" : "hidden"));
-
-		// TO DO (Aufgabe 4): Machen Sie hier this.pipDisplay sichtbar bzw.
-		// unsichtbar!
-
+		pipDisplay.setVisible(show);
 	}
 
 	/**
