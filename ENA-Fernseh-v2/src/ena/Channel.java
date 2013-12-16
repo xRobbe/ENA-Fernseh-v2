@@ -76,6 +76,6 @@ public class Channel {
 	}
 	
 	public String printCSV() {
-		return String.valueOf(channelFrequency) + ";" + channelNumber + ";" +  String.valueOf(channelQuality) + ";" +  channelName + ";" +  channelProvider;
+		return String.valueOf(channelFrequency) + ";" + channel + ";" +  String.valueOf(channelQuality) + ";" +  channelName + ";" +  channelProvider;
 	}
 }
