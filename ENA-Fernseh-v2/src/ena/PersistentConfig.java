@@ -12,9 +12,9 @@ public class PersistentConfig {
 	private final static String RATIO = "Ratio";
 	private final static String USERMODE = "Usermode";
 	private final static int MAX_VOLUME = 100;
-	
+
 	private final static int MAX_USERMODE = 2;
-	// 0 "Easy", 1 "Normal", 2 "Expert" 
+	// 0 "Easy", 1 "Normal", 2 "Expert"
 	private final static int MAX_RATIO = 2;
 	// 0 "16:9", 1 "4:3", 2 "2.35:1"
 
@@ -26,17 +26,13 @@ public class PersistentConfig {
 			// check if configfile exists, create if not
 			if (!((new File(FILENAME)).exists()))
 				new FileOutputStream(FILENAME);
-			
+
 			in = new FileInputStream(FILENAME);
 			properties.load(in);
-			
-			// check if config is valid, if not restore default 
+
+			// check if config is valid, if not restore default
 			if (!(checkConfig())) {
-				properties.setProperty(VOLUME, "50");
-				properties.setProperty(STATION, "1");
-				properties.setProperty(USERMODE, "0");
-				properties.setProperty(RATIO, "0");
-				properties.store(out(), null);
+				restoreDefault();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -48,7 +44,7 @@ public class PersistentConfig {
 		properties.store(out(), null);
 	}
 
-	public int getVolume() throws Exception {
+	public int getVolume() {
 		return Integer.parseInt(properties.getProperty(VOLUME));
 	}
 
@@ -57,7 +53,7 @@ public class PersistentConfig {
 		properties.store(out(), null);
 	}
 
-	public int getProgramm() throws Exception {
+	public int getProgramm() {
 		return Integer.parseInt(properties.getProperty(STATION));
 	}
 
@@ -66,7 +62,7 @@ public class PersistentConfig {
 		properties.store(out(), null);
 	}
 
-	public int getUsermode() throws Exception {
+	public int getUsermode() {
 		return Integer.parseInt(properties.getProperty(USERMODE));
 	}
 
@@ -75,7 +71,7 @@ public class PersistentConfig {
 		properties.store(out(), null);
 	}
 
-	public int getRatio() throws Exception {
+	public int getRatio() {
 		return Integer.parseInt(properties.getProperty(RATIO));
 	}
 
@@ -108,9 +104,34 @@ public class PersistentConfig {
 			return false;
 		return true;
 	}
-	
+
 	// returns new outputstream
 	private FileOutputStream out() throws Exception {
 		return new FileOutputStream(FILENAME);
+	}
+
+	private void restoreDefault() {
+		try {
+			properties.setProperty(VOLUME, "50");
+			properties.setProperty(STATION, "1");
+			properties.setProperty(USERMODE, "0");
+			properties.setProperty(RATIO, "0");
+			properties.store(out(), null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void reload() {
+		try {
+			in.close();
+			in = new FileInputStream(FILENAME);
+			properties.load(in);
+			if (!(checkConfig())) {
+				restoreDefault();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

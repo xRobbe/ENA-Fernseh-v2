@@ -5,7 +5,6 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
-
 // TableModel to work with Lists
 public class ChannelTableModelList extends AbstractTableModel implements TableModel {
 	private List<Channel> list;

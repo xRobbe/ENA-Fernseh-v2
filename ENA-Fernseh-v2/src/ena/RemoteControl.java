@@ -10,19 +10,38 @@ import javax.swing.JSlider;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JLabel;
+import javax.swing.ListSelectionModel;
 
 import java.awt.Font;
 
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JProgressBar;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class RemoteControl {
 
 	private JFrame frmRemotecontrol;
-	private JTable tableRemoteChannellist;
+	private JPanel panelRemoteSettings;
+	private JPanel panelRemoteControl;
+
+	private Screen screen;
+	private TvElectronics electronics;
+	private PersistentConfig config;
+	private PersistentChannel channel;
+	private JButton btnRemoteControlPiPActivate;
+	private JToggleButton tglbtnRemoteControlPiPSwitch;
+	private JButton btnRemoteControlTimeshiftStop;
+	private JButton btnRemoteControlTimeshiftStart;
+	private JButton btnRemoteControlTimeshiftFastforward;
+	private JComboBox comboBoxSettingsUsermode;
+	private JComboBox comboBoxSettingsAspectratio;
+	private JTable tableRemoteControlChannellist;
 
 	/**
 	 * Launch the application.
@@ -44,7 +63,12 @@ public class RemoteControl {
 	 * Create the application.
 	 */
 	public RemoteControl() {
+		screen = new Screen();
+		electronics = new TvElectronics(screen.getScreen(), screen.getPiPScreen());
+		config = new PersistentConfig();
+		channel = new PersistentChannel(electronics);
 		initialize();
+		updateUsermodeLayout();
 	}
 
 	/**
@@ -52,127 +76,253 @@ public class RemoteControl {
 	 */
 	private void initialize() {
 
-//******************************************************************* Frame *******************************************************************
-		
+		// *******************************************************************
+		// Frame
+		// *******************************************************************
+
 		frmRemotecontrol = new JFrame();
 		frmRemotecontrol.setTitle("RemoteControl");
 		frmRemotecontrol.setResizable(false);
 		frmRemotecontrol.setBounds(20, 50, 366, 666);
 		frmRemotecontrol.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmRemotecontrol.getContentPane().setLayout(null);
-		
-//******************************************************************* Control *******************************************************************
-		
-		JPanel panelRemoteControl = new JPanel();
+
+		// *******************************************************************
+		// Control
+		// *******************************************************************
+
+		panelRemoteControl = new JPanel();
 		panelRemoteControl.setBounds(0, 0, 360, 640);
 		frmRemotecontrol.getContentPane().add(panelRemoteControl);
 		panelRemoteControl.setLayout(null);
-		
-		JButton button = new JButton("Settings");
-		button.setToolTipText("Settings");
-		button.setBounds(10, 11, 77, 77);
-		panelRemoteControl.add(button);
-		
-		JButton button_1 = new JButton("PiP");
-		button_1.setToolTipText("Picture in Picture");
-		button_1.setBounds(97, 11, 77, 77);
-		panelRemoteControl.add(button_1);
-		
-		JToggleButton toggleButton = new JToggleButton("PiP Switch");
-		toggleButton.setToolTipText("Switch control between PiP and Screen");
-		toggleButton.setBounds(184, 11, 77, 77);
-		panelRemoteControl.add(toggleButton);
-		
-		JButton button_2 = new JButton("On/Off");
-		button_2.setToolTipText("Turn screen on/off");
-		button_2.setBounds(273, 11, 77, 77);
-		panelRemoteControl.add(button_2);
-		
-		JScrollPane scrollPaneRemoteChannellist = new JScrollPane();
-		scrollPaneRemoteChannellist.setBounds(10, 98, 340, 409);
-		panelRemoteControl.add(scrollPaneRemoteChannellist);
-		
-		tableRemoteChannellist = new JTable();
-		scrollPaneRemoteChannellist.setViewportView(tableRemoteChannellist);
-		
-		JButton btnRemoteVolumeMute = new JButton("Mute");
-		btnRemoteVolumeMute.setToolTipText("Mute Volume");
-		btnRemoteVolumeMute.setBounds(10, 518, 25, 25);
-		panelRemoteControl.add(btnRemoteVolumeMute);
-		
-		JButton btnRemoteVolumeDown = new JButton("V-");
-		btnRemoteVolumeDown.setToolTipText("Decrease Volume");
-		btnRemoteVolumeDown.setBounds(45, 518, 25, 25);
-		panelRemoteControl.add(btnRemoteVolumeDown);
-		
-		JSlider slider = new JSlider();
-		slider.setBounds(80, 518, 235, 23);
-		panelRemoteControl.add(slider);
-		
-		JButton btnRemoteVolumeUp = new JButton("V+");
-		btnRemoteVolumeUp.setToolTipText("Increase Volume");
-		btnRemoteVolumeUp.setBounds(325, 518, 25, 25);
-		panelRemoteControl.add(btnRemoteVolumeUp);
-		
-		JButton btnRemoteTimeshiftStop = new JButton("TS Stop");
-		btnRemoteTimeshiftStop.setToolTipText("Stop TimeShift");
-		btnRemoteTimeshiftStop.setBounds(10, 552, 77, 77);
-		panelRemoteControl.add(btnRemoteTimeshiftStop);
-		
-		JButton btnRemoteTimeshiftFastforward = new JButton("TS FF");
-		btnRemoteTimeshiftFastforward.setToolTipText("Fastforward TimeShift");
-		btnRemoteTimeshiftFastforward.setBounds(273, 552, 77, 77);
-		panelRemoteControl.add(btnRemoteTimeshiftFastforward);
-		
-		JButton btnTsStart = new JButton("TS Start");
-		btnTsStart.setToolTipText("Start/Pause TimeShift");
-		btnTsStart.setBounds(146, 552, 77, 77);
-		panelRemoteControl.add(btnTsStart);
-		
-//******************************************************************* Settings *******************************************************************
-		
-		JPanel panelRemoteSettings = new JPanel();
+
+		JButton btnRemoteControlSettings = new JButton("Settings");
+		btnRemoteControlSettings.setToolTipText("Settings");
+		btnRemoteControlSettings.setBounds(10, 11, 77, 77);
+		panelRemoteControl.add(btnRemoteControlSettings);
+
+		btnRemoteControlPiPActivate = new JButton("PiP");
+		btnRemoteControlPiPActivate.setEnabled(false);
+		btnRemoteControlPiPActivate.setToolTipText("Picture in Picture");
+		btnRemoteControlPiPActivate.setBounds(97, 11, 77, 77);
+		panelRemoteControl.add(btnRemoteControlPiPActivate);
+
+		tglbtnRemoteControlPiPSwitch = new JToggleButton("PiP Switch");
+		tglbtnRemoteControlPiPSwitch.setEnabled(false);
+		tglbtnRemoteControlPiPSwitch.setToolTipText("Switch control between PiP and Screen");
+		tglbtnRemoteControlPiPSwitch.setBounds(184, 11, 77, 77);
+		panelRemoteControl.add(tglbtnRemoteControlPiPSwitch);
+
+		JButton btnRemoteControlPower = new JButton("On/Off");
+		btnRemoteControlPower.setToolTipText("Turn screen on/off");
+		btnRemoteControlPower.setBounds(273, 11, 77, 77);
+		panelRemoteControl.add(btnRemoteControlPower);
+
+		JScrollPane scrollPaneRemoteControlChannellist = new JScrollPane();
+		scrollPaneRemoteControlChannellist.setBounds(10, 98, 340, 409);
+		panelRemoteControl.add(scrollPaneRemoteControlChannellist);
+
+		tableRemoteControlChannellist = new JTable();
+		scrollPaneRemoteControlChannellist.setViewportView(tableRemoteControlChannellist);
+		tableRemoteControlChannellist.setModel(new ChannelTableModelList(channel.getChannelList()));
+		formatTable();
+
+		JButton btnRemoteControlVolumeMute = new JButton("Mute");
+		btnRemoteControlVolumeMute.setEnabled(false);
+		btnRemoteControlVolumeMute.setToolTipText("Mute Volume");
+		btnRemoteControlVolumeMute.setBounds(10, 518, 25, 25);
+		panelRemoteControl.add(btnRemoteControlVolumeMute);
+
+		JButton btnRemoteControlVolumeDown = new JButton("V-");
+		btnRemoteControlVolumeDown.setEnabled(false);
+		btnRemoteControlVolumeDown.setToolTipText("Decrease Volume");
+		btnRemoteControlVolumeDown.setBounds(45, 518, 25, 25);
+		panelRemoteControl.add(btnRemoteControlVolumeDown);
+
+		final JSlider sliderRemoteControlVolume = new JSlider();
+		sliderRemoteControlVolume.setEnabled(false);
+		sliderRemoteControlVolume.setBounds(80, 518, 235, 23);
+		panelRemoteControl.add(sliderRemoteControlVolume);
+
+		JButton btnRemoteControlVolumeUp = new JButton("V+");
+		btnRemoteControlVolumeUp.setEnabled(false);
+		btnRemoteControlVolumeUp.setToolTipText("Increase Volume");
+		btnRemoteControlVolumeUp.setBounds(325, 518, 25, 25);
+		panelRemoteControl.add(btnRemoteControlVolumeUp);
+
+		btnRemoteControlTimeshiftStop = new JButton("TS Stop");
+		btnRemoteControlTimeshiftStop.setEnabled(false);
+		btnRemoteControlTimeshiftStop.setToolTipText("Stop TimeShift");
+		btnRemoteControlTimeshiftStop.setBounds(10, 552, 77, 77);
+		panelRemoteControl.add(btnRemoteControlTimeshiftStop);
+
+		btnRemoteControlTimeshiftStart = new JButton("TS Start");
+		btnRemoteControlTimeshiftStart.setEnabled(false);
+		btnRemoteControlTimeshiftStart.setToolTipText("Start/Pause TimeShift");
+		btnRemoteControlTimeshiftStart.setBounds(146, 552, 77, 77);
+		panelRemoteControl.add(btnRemoteControlTimeshiftStart);
+
+		btnRemoteControlTimeshiftFastforward = new JButton("TS FF");
+		btnRemoteControlTimeshiftFastforward.setEnabled(false);
+		btnRemoteControlTimeshiftFastforward.setToolTipText("Fastforward TimeShift");
+		btnRemoteControlTimeshiftFastforward.setBounds(273, 552, 77, 77);
+		panelRemoteControl.add(btnRemoteControlTimeshiftFastforward);
+
+		// *******************************************************************
+		// Control Handler
+		// *******************************************************************
+
+		btnRemoteControlSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				config.reload();
+				comboBoxSettingsUsermode.setSelectedIndex(config.getUsermode());
+				comboBoxSettingsAspectratio.setSelectedIndex(config.getRatio());
+				panelRemoteControl.setVisible(false);
+				panelRemoteSettings.setVisible(true);
+			}
+		});
+
+		sliderRemoteControlVolume.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				try {
+					electronics.setVolume(sliderRemoteControlVolume.getValue());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		// *******************************************************************
+		// Settings
+		// *******************************************************************
+
+		panelRemoteSettings = new JPanel();
+		panelRemoteSettings.setVisible(false);
 		panelRemoteSettings.setBounds(0, 0, 360, 638);
 		frmRemotecontrol.getContentPane().add(panelRemoteSettings);
 		panelRemoteSettings.setLayout(null);
-		
+
 		JLabel lblSettingsUsermode = new JLabel("Usermode");
 		lblSettingsUsermode.setFont(new Font("Tahoma", Font.BOLD, 16));
 		lblSettingsUsermode.setBounds(10, 40, 130, 20);
 		panelRemoteSettings.add(lblSettingsUsermode);
-		
-		JComboBox comboBoxSettingsUsermode = new JComboBox();
+
+		comboBoxSettingsUsermode = new JComboBox();
+		comboBoxSettingsUsermode.setName("usermode");
 		comboBoxSettingsUsermode.setFont(new Font("Tahoma", Font.BOLD, 16));
-		comboBoxSettingsUsermode.setModel(new DefaultComboBoxModel(new String[] {"Easy", "Normal", "Expert"}));
+		comboBoxSettingsUsermode.setModel(new DefaultComboBoxModel(new String[] { "Easy", "Normal", "Expert" }));
 		comboBoxSettingsUsermode.setBounds(150, 40, 200, 20);
 		panelRemoteSettings.add(comboBoxSettingsUsermode);
-		
+
 		JLabel lblAspectRatio = new JLabel("Aspect Ratio");
 		lblAspectRatio.setFont(new Font("Tahoma", Font.BOLD, 16));
 		lblAspectRatio.setBounds(10, 80, 130, 20);
 		panelRemoteSettings.add(lblAspectRatio);
-		
-		JComboBox comboBoxSettingsAspectratio = new JComboBox();
-		comboBoxSettingsAspectratio.setModel(new DefaultComboBoxModel(new String[] {"16:9     Widescreen", "4:3       Normal", "2.35:1  Cinemascope"}));
+
+		comboBoxSettingsAspectratio = new JComboBox();
+		comboBoxSettingsAspectratio.setName("aspectratio");
+		comboBoxSettingsAspectratio.setModel(new DefaultComboBoxModel(new String[] { "16:9     Widescreen", "4:3       Normal",
+				"2.35:1  Cinemascope" }));
 		comboBoxSettingsAspectratio.setFont(new Font("Tahoma", Font.BOLD, 16));
 		comboBoxSettingsAspectratio.setBounds(150, 80, 200, 20);
 		panelRemoteSettings.add(comboBoxSettingsAspectratio);
-		
-		JButton btnSettingsChannelscan = new JButton("Channelscan");
+
+		final JButton btnSettingsChannelscan = new JButton("Channelscan");
 		btnSettingsChannelscan.setBounds(115, 186, 130, 25);
 		panelRemoteSettings.add(btnSettingsChannelscan);
-		
-		JProgressBar progressBarSettingsChannelscan = new JProgressBar();
+
+		final JProgressBar progressBarSettingsChannelscan = new JProgressBar();
 		progressBarSettingsChannelscan.setBounds(10, 246, 340, 25);
 		panelRemoteSettings.add(progressBarSettingsChannelscan);
-		
-		JButton btnSettingsCancel = new JButton("Cancel");
-		btnSettingsCancel.setVisible(false);
+
+		final JButton btnSettingsCancel = new JButton("Cancel");
 		btnSettingsCancel.setBounds(10, 577, 130, 50);
 		panelRemoteSettings.add(btnSettingsCancel);
-		
-		JButton btnSettingsSave = new JButton("Save");
+
+		final JButton btnSettingsSave = new JButton("Save");
 		btnSettingsSave.setBounds(220, 577, 130, 50);
 		panelRemoteSettings.add(btnSettingsSave);
+
+		// *******************************************************************
+		// Settings Handler
+		// *******************************************************************
+
+		// unable to cancel, change is active without save
+		btnSettingsChannelscan.addActionListener(new RunnableActionListener() {
+			public void run() {
+				btnSettingsSave.setEnabled(false);
+				btnSettingsChannelscan.setEnabled(false);
+				btnSettingsCancel.setEnabled(false);
+				progressBarSettingsChannelscan.setIndeterminate(true);
+				channel.scanChannel();
+				// TODO model aktualisieren
+				btnSettingsSave.setEnabled(true);
+				btnSettingsChannelscan.setEnabled(true);
+				btnSettingsCancel.setEnabled(true);
+				progressBarSettingsChannelscan.setIndeterminate(false);
+			}
+		});
+
+		btnSettingsCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				panelRemoteSettings.setVisible(false);
+				panelRemoteControl.setVisible(true);
+			}
+		});
+
+		btnSettingsSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveSettings();
+				updateUsermodeLayout();
+				// TODO Zoom
+				// if (config.getRatio() != 0)
+				// electronics.setZoom(true);
+				// else
+				// electronics.setZoom(false);
+				panelRemoteSettings.setVisible(false);
+				panelRemoteControl.setVisible(true);
+			}
+		});
+	}
+
+	// *******************************************************************
+	// Functions
+	// *******************************************************************
+
+	private void saveSettings() {
+		try {
+			config.setUsermode(comboBoxSettingsUsermode.getSelectedIndex());
+			config.setRatio(comboBoxSettingsAspectratio.getSelectedIndex());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void updateUsermodeLayout() {
+		btnRemoteControlPiPActivate.setVisible(false);
+		tglbtnRemoteControlPiPSwitch.setVisible(false);
+		btnRemoteControlTimeshiftStop.setVisible(false);
+		btnRemoteControlTimeshiftStart.setVisible(false);
+		btnRemoteControlTimeshiftFastforward.setVisible(false);
+
+		if (config.getUsermode() >= 1) {
+			btnRemoteControlTimeshiftStop.setVisible(true);
+			btnRemoteControlTimeshiftStart.setVisible(true);
+			btnRemoteControlTimeshiftFastforward.setVisible(true);
+		}
+		if (config.getUsermode() >= 2) {
+			btnRemoteControlPiPActivate.setVisible(true);
+			tglbtnRemoteControlPiPSwitch.setVisible(true);
+		}
+	}
+
+	private void formatTable() {
+		tableRemoteControlChannellist.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		tableRemoteControlChannellist.setAutoCreateRowSorter(true);
+		tableRemoteControlChannellist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableRemoteControlChannellist.setRowSelectionInterval(0, 0);
+		tableRemoteControlChannellist.getColumnModel().getColumn(0).setPreferredWidth(70);
+		tableRemoteControlChannellist.setRowHeight(31);
+		tableRemoteControlChannellist.getColumnModel().getColumn(1).setPreferredWidth(250);
 	}
 }

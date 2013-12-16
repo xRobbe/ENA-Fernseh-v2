@@ -12,6 +12,7 @@ public class Screen {
 	private JFrame frame;
 	private final JPanel panelScreenTV = new JPanel();
 	private JTable tableScreenChannellist;
+	private JPanel panelScreenPiP;
 
 	/**
 	 * Launch the application.
@@ -41,30 +42,38 @@ public class Screen {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setBounds(450, 50, 1286, 746);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		panelScreenTV.setBounds(0, 0, 1280, 720);
 		frame.getContentPane().add(panelScreenTV);
 		panelScreenTV.setLayout(null);
-		
-		JPanel panelScreenPiP = new JPanel();
+
+		panelScreenPiP = new JPanel();
 		panelScreenPiP.setVisible(false);
 		panelScreenPiP.setBounds(886, 11, 384, 216);
 		panelScreenTV.add(panelScreenPiP);
-		
+
 		JPanel panelScreenChannelinfo = new JPanel();
 		panelScreenChannelinfo.setVisible(false);
 		panelScreenChannelinfo.setBounds(256, 720, 768, 128);
 		panelScreenTV.add(panelScreenChannelinfo);
-		
+
 		JScrollPane scrollPaneScreenChannellist = new JScrollPane();
 		scrollPaneScreenChannellist.setVisible(false);
 		scrollPaneScreenChannellist.setBounds(-256, 0, 256, 720);
 		panelScreenTV.add(scrollPaneScreenChannellist);
-		
+
 		tableScreenChannellist = new JTable();
 		scrollPaneScreenChannellist.setViewportView(tableScreenChannellist);
+	}
+
+	public JPanel getScreen() {
+		return panelScreenTV;
+	}
+
+	public JPanel getPiPScreen() {
+		return panelScreenPiP;
 	}
 }
