@@ -28,7 +28,7 @@ public class PersistentChannel {
 
 	public void readChannel() {
 		String line;
-		int i = 11;
+		int i = 1;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(FILENAME));
 			br.readLine();

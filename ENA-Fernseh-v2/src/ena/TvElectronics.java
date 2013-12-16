@@ -103,7 +103,8 @@ public class TvElectronics {
 		System.out.println((forPiP ? "PiP" : "Main") + " channel = " + channel);
 
 		screen.setChannelPicture(picturePath, forPiP);
-		remote.getConfig().setProgramm(remote.getSelectedChannel());
+		if (!forPiP)
+			remote.getConfig().setProgramm(remote.getSelectedChannel());
 
 	}
 

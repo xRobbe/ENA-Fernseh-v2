@@ -198,7 +198,13 @@ public class RemoteControl {
 				} else {
 					electronics.setPictureInPicture(true);
 					tglbtnRemoteControlPiPSwitch.setEnabled(true);
-					tglbtnRemoteControlPiPSwitch.setSelected(true);
+					try {
+						electronics.setChannel(channel.getChannelList().get(config.getProgramm()).getChannel(),
+								true,
+								channel.getChannelList().get(config.getProgramm()).getChannelPicturePath());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 				}
 			}
 		});
@@ -225,7 +231,7 @@ public class RemoteControl {
 
 		tableRemoteControlChannellist.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent event) {
-				if (event.getClickCount() == 2) {
+				if (event.getClickCount() == 2 && screen.isVisible()) {
 					try {
 						electronics.setChannel(channel.getChannelList().get(tableRemoteControlChannellist.getSelectedRow()).getChannel(),
 								tglbtnRemoteControlPiPSwitch.isSelected(),
@@ -419,7 +425,7 @@ public class RemoteControl {
 		btnRemoteControlTimeshiftStop.setEnabled(on);
 		btnRemoteControlTimeshiftStart.setEnabled(on);
 		btnRemoteControlTimeshiftFastforward.setEnabled(on);
-
+		tableRemoteControlChannellist.setEnabled(on);
 	}
 
 	private void formatTable() {
