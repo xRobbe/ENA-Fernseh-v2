@@ -50,6 +50,9 @@ public class RemoteControl {
 	private JSlider sliderRemoteControlVolume;
 	private JButton btnRemoteControlVolumeUp;
 
+	private int timer;
+	private Thread showInfo;
+
 	/**
 	 * Launch the application.
 	 */
@@ -236,6 +239,7 @@ public class RemoteControl {
 						electronics.setChannel(channel.getChannelList().get(tableRemoteControlChannellist.getSelectedRow()).getChannel(),
 								tglbtnRemoteControlPiPSwitch.isSelected(),
 								channel.getChannelList().get(tableRemoteControlChannellist.getSelectedRow()).getChannelPicturePath());
+						showInfo();
 						if (config.getRatio() >= 1) {
 							electronics.setZoom(true);
 						}
@@ -451,5 +455,28 @@ public class RemoteControl {
 
 	public int getSelectedChannel() {
 		return tableRemoteControlChannellist.getSelectedRow();
+	}
+
+	private void showInfo() {
+		timer = 1200;
+		if (showInfo != null)
+			if (showInfo.isAlive())
+				showInfo.stop();
+		showInfo = new Thread(new Runnable() {
+			public void run() {
+				screen.showChannelInfo(channel.getChannelList().get(config.getProgramm()).getChannelName(), true);
+				while (timer > 0) {
+					timer -= 200;
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				screen.showChannelInfo(channel.getChannelList().get(config.getProgramm()).getChannelName(), false);
+			}
+		});
+		showInfo.start();
+
 	}
 }

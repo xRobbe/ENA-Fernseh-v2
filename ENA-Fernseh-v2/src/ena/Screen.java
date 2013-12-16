@@ -20,6 +20,13 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.CardLayout;
+import javax.swing.SwingConstants;
 
 public class Screen {
 
@@ -32,6 +39,9 @@ public class Screen {
 	private JLabel lblScreenPiPPicture;
 
 	private RemoteControl remote;
+	private JButton btnNewButton;
+	private JPanel panelScreenChannelinfo;
+	private JLabel lblScreenChannelInfoName;
 
 	/**
 	 * Create the application.
@@ -57,16 +67,23 @@ public class Screen {
 
 		panelScreenPiP = new JPanel();
 		panelScreenPiP.setVisible(false);
+
+		panelScreenChannelinfo = new JPanel();
+		panelScreenChannelinfo.setVisible(false);
+		panelScreenChannelinfo.setBounds(256, 720, 768, 128);
+		panelScreenTV.add(panelScreenChannelinfo);
+		panelScreenChannelinfo.setLayout(null);
+
+		lblScreenChannelInfoName = new JLabel("ChannelName");
+		lblScreenChannelInfoName.setHorizontalAlignment(SwingConstants.CENTER);
+		lblScreenChannelInfoName.setBounds(0, 0, 768, 128);
+		lblScreenChannelInfoName.setFont(new Font("Tahoma", Font.BOLD, 35));
+		panelScreenChannelinfo.add(lblScreenChannelInfoName);
 		panelScreenPiP.setBounds(886, 11, 384, 216);
 		panelScreenTV.add(panelScreenPiP);
 
 		lblScreenPiPPicture = new JLabel("");
 		panelScreenPiP.add(lblScreenPiPPicture);
-
-		JPanel panelScreenChannelinfo = new JPanel();
-		panelScreenChannelinfo.setVisible(false);
-		panelScreenChannelinfo.setBounds(256, 720, 768, 128);
-		panelScreenTV.add(panelScreenChannelinfo);
 
 		JScrollPane scrollPaneScreenChannellist = new JScrollPane();
 		scrollPaneScreenChannellist.setVisible(false);
@@ -150,7 +167,7 @@ public class Screen {
 		}
 	}
 
-	public void setChannelPicture(String picturePath, boolean pip, boolean zoom) {
+	public void setChannelPicture(boolean zoom, String picturePath) {
 		try {
 			if (zoom) {
 				BufferedImage img = ImageIO.read(new File(picturePath));
@@ -184,16 +201,16 @@ public class Screen {
 		panelScreenTV.repaint();
 	}
 
-	private void movePanelUp(JPanel panel, int max, int min) {
+	private void movePanelUp(JPanel panel, int max, int min, boolean show) {
 		try {
 			int time = 300 / Math.abs(max - min);
-			if (panel.getBounds().y == max) {
+			if (show) {
 				panel.setVisible(true);
 				while (panel.getBounds().y > min) {
 					panel.setBounds(panel.getBounds().x, panel.getBounds().y - 1, panel.getBounds().width, panel.getBounds().height);
 					Thread.sleep(time);
 				}
-			} else if (panel.getBounds().y == min) {
+			} else {
 				while (panel.getBounds().y < max) {
 					panel.setBounds(panel.getBounds().x, panel.getBounds().y + 1, panel.getBounds().width, panel.getBounds().height);
 					Thread.sleep(time);
@@ -203,5 +220,11 @@ public class Screen {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void showChannelInfo(String name, boolean show) {
+		lblScreenChannelInfoName.setText(name);
+		panelScreenChannelinfo.setVisible(true);
+		movePanelUp(panelScreenChannelinfo, panelScreenTV.getHeight(), panelScreenTV.getHeight() - panelScreenChannelinfo.getHeight(), show);
 	}
 }

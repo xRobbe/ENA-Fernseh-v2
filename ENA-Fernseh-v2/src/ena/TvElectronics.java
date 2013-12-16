@@ -137,9 +137,9 @@ public class TvElectronics {
 	public void setZoom(boolean on) {
 		System.out.println("Zoom = " + (on ? "133%" : "100%"));
 		if (on)
-			screen.setChannelPicture(remote.getChannel().getChannelList().get(remote.getSelectedChannel()).getChannelPicturePath(), false, on);
+			screen.setChannelPicture(on, remote.getChannel().getChannelList().get(remote.getSelectedChannel()).getChannelPicturePath());
 		else
-			screen.setChannelPicture(remote.getChannel().getChannelList().get(remote.getSelectedChannel()).getChannelPicturePath(), false, on);
+			screen.setChannelPicture(on, remote.getChannel().getChannelList().get(remote.getSelectedChannel()).getChannelPicturePath());
 	}
 
 	/**
