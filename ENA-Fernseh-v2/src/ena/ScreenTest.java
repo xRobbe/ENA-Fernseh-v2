@@ -181,7 +181,8 @@ public class ScreenTest {
 				try {
 					while (true) {
 						if (frame.isVisible()) {
-							BufferedImage img = resize(ImageIO.read(new File(remote.getChannel().getChannelList().get(remote.getConfig().getProgramm()).getChannelPicturePath())), panelScreenTV.getWidth(),
+							BufferedImage img = resize(ImageIO.read(new File(remote.getChannel().getChannelList().get(remote.getConfig().getProgramm()).getChannelPicturePath())),
+									panelScreenTV.getWidth(),
 									panelScreenTV.getHeight());
 							panelScreenTV.remove(lblScreenTvPicture);
 							lblScreenTvPicture = new JLabel(new ImageIcon(img));
@@ -258,7 +259,7 @@ public class ScreenTest {
 			BufferedImage img = ImageIO.read(new File(picturePath));
 			GridBagConstraints c = new GridBagConstraints();
 			if (pip) {
-				img = resize(img, panelScreenPiP.getWidth(), panelScreenPiP.getHeight());
+				img = resize(img, (int) (panelScreenTV.getWidth() * 0.3), (int) (panelScreenTV.getHeight() * 0.3));
 				panelScreenPiP.remove(lblScreenPiPPicture);
 				lblScreenPiPPicture = new JLabel(new ImageIcon(img));
 				c.fill = GridBagConstraints.BOTH;
