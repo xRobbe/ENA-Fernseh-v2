@@ -22,8 +22,9 @@ public class TvElectronics {
 	protected JPanel pipDisplay;
 	private Screen screen;
 	private RemoteControl remote;
-	private boolean isRecording; // der TimeShift-Recorder nimmt momentan auf
-	private long recordingStartTime; // zu diesem Zeitpunkt hat die
+	private boolean isPlaying = false;
+	private boolean isRecording = false; 		// der TimeShift-Recorder nimmt momentan auf
+	private long recordingStartTime; 	// zu diesem Zeitpunkt hat die
 										// TimeShift-Aufnahme begonnen (in
 										// Sekunden seit 1.1.1970)
 
@@ -172,6 +173,8 @@ public class TvElectronics {
 		this.isRecording = start;
 		this.recordingStartTime = now();
 		System.out.println((start ? "Start" : "Stop") + " timeshift recording");
+		
+		screen.recordTimeShift(start);
 	}
 
 	/**
@@ -193,5 +196,16 @@ public class TvElectronics {
 				this.recordingStartTime + offset > now())
 			throw new Exception("TimeShift has not yet buffered " + offset + " seconds");
 		System.out.println((start ? "Start" : "Stop") + " timeshift playing" + (start ? " (offset " + offset + " seconds)" : ""));
+		
+		this.isPlaying = start;
+		screen.playTimeShift(start, offset);
+	}
+	
+	public boolean isRecording() {
+		return isRecording;
+	}
+	
+	public boolean isPlaying() {
+		return isPlaying;
 	}
 }

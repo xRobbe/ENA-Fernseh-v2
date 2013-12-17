@@ -297,6 +297,42 @@ public class RemoteControl {
 			}
 		});
 
+		btnRemoteControlTimeshiftStop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					electronics.recordTimeShift(false);
+					electronics.playTimeShift(false, 0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		btnRemoteControlTimeshiftStart.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					if (!electronics.isRecording()) {
+						electronics.recordTimeShift(true);
+						electronics.playTimeShift(false, 0);
+					} else {
+						if (electronics.isPlaying()) {
+							electronics.playTimeShift(false, screen.getOffset());
+						} else {
+							electronics.playTimeShift(true, screen.getOffset());
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		btnRemoteControlTimeshiftFastforward.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				screen.forwardTimeShift(true, screen.getOffset());
+			}
+		});
+
 		// *******************************************************************
 		// Settings
 		// *******************************************************************
@@ -326,8 +362,7 @@ public class RemoteControl {
 
 		comboBoxSettingsAspectratio = new JComboBox();
 		comboBoxSettingsAspectratio.setName("aspectratio");
-		comboBoxSettingsAspectratio.setModel(new DefaultComboBoxModel(new String[] { "16:9     Widescreen", "4:3       Normal",
-				"2.35:1  Cinemascope" }));
+		comboBoxSettingsAspectratio.setModel(new DefaultComboBoxModel(new String[] { "16:9     Widescreen", "4:3       Normal", "2.35:1  Cinemascope" }));
 		comboBoxSettingsAspectratio.setFont(new Font("Tahoma", Font.BOLD, 16));
 		comboBoxSettingsAspectratio.setBounds(150, 80, 200, 20);
 		panelRemoteSettings.add(comboBoxSettingsAspectratio);
@@ -430,6 +465,12 @@ public class RemoteControl {
 		btnRemoteControlTimeshiftStart.setEnabled(on);
 		btnRemoteControlTimeshiftFastforward.setEnabled(on);
 		tableRemoteControlChannellist.setEnabled(on);
+		try {
+			if(electronics.isRecording())
+				electronics.recordTimeShift(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void formatTable() {

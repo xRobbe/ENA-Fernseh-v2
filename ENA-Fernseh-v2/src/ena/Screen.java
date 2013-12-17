@@ -27,6 +27,7 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.CardLayout;
 import javax.swing.SwingConstants;
+import javax.swing.JProgressBar;
 
 public class Screen {
 
@@ -42,6 +43,13 @@ public class Screen {
 	private JButton btnNewButton;
 	private JPanel panelScreenChannelinfo;
 	private JLabel lblScreenChannelInfoName;
+	private JProgressBar progressBarScreenTimeshift;
+
+	private boolean isRecording = false;
+	private boolean isPlaying = false;
+	private Thread recordingThread;
+	private Thread playingThread;
+	private int timeshift;
 
 	/**
 	 * Create the application.
@@ -70,6 +78,12 @@ public class Screen {
 
 		panelScreenChannelinfo = new JPanel();
 		panelScreenChannelinfo.setVisible(false);
+
+		progressBarScreenTimeshift = new JProgressBar();
+		progressBarScreenTimeshift.setVisible(false);
+		progressBarScreenTimeshift.setMaximum(0);
+		progressBarScreenTimeshift.setBounds(0, 710, 1280, 10);
+		panelScreenTV.add(progressBarScreenTimeshift);
 		panelScreenChannelinfo.setBounds(256, 720, 768, 128);
 		panelScreenTV.add(panelScreenChannelinfo);
 		panelScreenChannelinfo.setLayout(null);
@@ -226,5 +240,67 @@ public class Screen {
 		lblScreenChannelInfoName.setText(name);
 		panelScreenChannelinfo.setVisible(true);
 		movePanelUp(panelScreenChannelinfo, panelScreenTV.getHeight(), panelScreenTV.getHeight() - panelScreenChannelinfo.getHeight(), show);
+	}
+
+	public void recordTimeShift(boolean recording) {
+		this.isRecording = recording;
+		progressBarScreenTimeshift.setVisible(isRecording);
+		if (recordingThread == null) {
+			recordingThread = new Thread(new Runnable() {
+				public void run() {
+					try {
+						while (isRecording) {
+							progressBarScreenTimeshift.setMaximum(progressBarScreenTimeshift.getMaximum() + 1);
+							Thread.sleep(1000);
+						}
+						progressBarScreenTimeshift.setMaximum(0);
+						progressBarScreenTimeshift.setValue(0);
+						recordingThread = null;
+						playingThread = null;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+			});
+			recordingThread.start();
+		} else {
+			if (recordingThread.isAlive())
+				System.out.println("Recording already started");
+		}
+
+	}
+
+	public int getOffset() {
+		return progressBarScreenTimeshift.getValue();
+	}
+
+	public void playTimeShift(boolean playing, int offset) {
+		this.isPlaying = playing;
+		this.timeshift = 1;
+		if (playingThread == null) {
+			playingThread = new Thread(new Runnable() {
+				public void run() {
+					try {
+						while (isRecording) {
+							if((getOffset() + timeshift) > progressBarScreenTimeshift.getMaximum())
+								remote.getElectronics().recordTimeShift(false);
+							if (isPlaying)
+								progressBarScreenTimeshift.setValue(getOffset() + timeshift);
+							Thread.sleep(1000);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+			});
+			playingThread.start();
+		}
+	}
+	
+	public void forwardTimeShift(boolean playing, int offset) {
+		this.isPlaying = playing;
+		this.timeshift = 5;
 	}
 }
