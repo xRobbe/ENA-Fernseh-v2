@@ -35,8 +35,8 @@ import javax.swing.JProgressBar;
 
 public class ScreenTest {
 	private JFrame frame;
-	private final JPanel panelScreenTV = new JPanel();
-	private JPanel panelScreenPiP = new JPanel();
+	private JPanel panelScreenTV;
+	private JPanel panelScreenPiP;
 
 	private JLabel lblScreenTvPicture;
 	private JLabel lblScreenPiPPicture;
@@ -52,27 +52,24 @@ public class ScreenTest {
 	private Thread playingThread;
 	private int timeshift;
 
-	private int tvHeight;
-	private int tvWidth;
-
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ScreenTest window = new ScreenTest();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	// public static void main(String[] args) {
+	// EventQueue.invokeLater(new Runnable() {
+	// public void run() {
+	// try {
+	// ScreenTest window = new ScreenTest();
+	// window.frame.setVisible(true);
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// }
+	// });
+	// }
 
 	/**
 	 * Create the application.
 	 */
-	public ScreenTest(/* RemoteControl remote */) {
-		// this.remote = remote;
+	public ScreenTest(RemoteControl remote) {
+		this.remote = remote;
 		initialize();
 	}
 
@@ -84,37 +81,41 @@ public class ScreenTest {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setBounds(450, 50, 1286, 746);
 		frame.getContentPane().setLayout(new GridBagLayout());
-		frame.getContentPane().setBackground(Color.RED);
-		
-		
+
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 0.2, 0.4921875, .1078125, 0.1921875, 0.0078125, Double.MIN_VALUE };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0 };
-		gridBagLayout.rowWeights = new double[] { 0.0138, 0.3, 0.5083, 0.177, Double.MIN_VALUE };
-
-		
-
-		panelScreenTV.setBackground(Color.BLACK);
-		panelScreenTV.setBounds(0, 0, 1280, 720);
-		panelScreenTV.setLayout(gridBagLayout);
-		frame.getContentPane().add(panelScreenTV);
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gridBagLayout.rowWeights = new double[] { 0.0138, 0.3, 0.5083, 0.1632, 0.0138, Double.MIN_VALUE };
 
 		GridBagConstraints c = new GridBagConstraints();
 
+		// panelScreenTV
+		panelScreenTV = new JPanel();
+		panelScreenTV.setBackground(Color.BLACK);
+		panelScreenTV.setLayout(gridBagLayout);
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.weighty = 1.0;
+		c.gridx = 0;
+		c.gridy = 0;
+		frame.getContentPane().add(panelScreenTV, c);
+
+		// lblScreenTvPicture
+		lblScreenTvPicture = new JLabel("");
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 5;
-		c.gridheight = 4;
-		frame.getContentPane().add(panelScreenTV, c);
-
-		lblScreenTvPicture = new JLabel("");
-		lblScreenTvPicture.setIcon(new ImageIcon("src/screens/zdf"));
+		c.gridheight = 5;
 		panelScreenTV.add(lblScreenTvPicture, c);
 
+		// panelScreenPiP
+		panelScreenPiP = new JPanel();
+		panelScreenPiP.setLayout(new GridBagLayout());
+		panelScreenPiP.setVisible(false);
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 0.3;
 		c.weighty = 0.3;
@@ -124,12 +125,64 @@ public class ScreenTest {
 		c.gridheight = 1;
 		panelScreenTV.add(panelScreenPiP, c);
 
+		// lblScreenPiPPicture
+		lblScreenPiPPicture = new JLabel();
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.weighty = 1.0;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		panelScreenPiP.add(lblScreenPiPPicture, c);
+
+		// progressBarScreenTimeshift
+		progressBarScreenTimeshift = new JProgressBar();
+		progressBarScreenTimeshift.setVisible(false);
+		progressBarScreenTimeshift.setMaximum(0);
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.weighty = 0.0138;
+		c.gridx = 0;
+		c.gridy = 4;
+		c.gridwidth = 5;
+		c.gridheight = 1;
+		panelScreenTV.add(progressBarScreenTimeshift, c);
+
+		// panelScreenChannelinfo
+		panelScreenChannelinfo = new JPanel();
+		panelScreenChannelinfo.setLayout(new GridBagLayout());
+		panelScreenChannelinfo.setVisible(false);
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 0.6;
+		c.weighty = 0.177;
+		c.gridx = 1;
+		c.gridy = 3;
+		c.gridwidth = 2;
+		c.gridheight = 1;
+		panelScreenTV.add(panelScreenChannelinfo, c);
+
+		// lblScreenChannelInfoName
+		lblScreenChannelInfoName = new JLabel();
+		lblScreenChannelInfoName.setFont(new Font("Tahoma", Font.BOLD, 35));
+		lblScreenChannelInfoName.setHorizontalAlignment(SwingConstants.CENTER);
+		lblScreenChannelInfoName.setText("ChannelName");
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.weighty = 1.0;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		panelScreenChannelinfo.add(lblScreenChannelInfoName, c);
+
 		new Thread(new Runnable() {
 			public void run() {
 				try {
 					while (true) {
-						if (tvHeight != frame.getHeight() || tvWidth != frame.getWidth()) {
-							BufferedImage img = resize(ImageIO.read(new File("src/screens/zdf")), panelScreenTV.getWidth(), panelScreenTV.getHeight());
+						if (frame.isVisible()) {
+							BufferedImage img = resize(ImageIO.read(new File(remote.getChannel().getChannelList().get(remote.getConfig().getProgramm()).getChannelPicturePath())), panelScreenTV.getWidth(),
+									panelScreenTV.getHeight());
 							panelScreenTV.remove(lblScreenTvPicture);
 							lblScreenTvPicture = new JLabel(new ImageIcon(img));
 							GridBagConstraints c = new GridBagConstraints();
@@ -142,13 +195,10 @@ public class ScreenTest {
 							c.gridwidth = 5;
 							c.gridheight = 4;
 
-							panelScreenTV.add(lblScreenTvPicture,c);
+							panelScreenTV.add(lblScreenTvPicture, c);
 							panelScreenTV.revalidate();
-							tvHeight = frame.getHeight();
-							tvWidth = frame.getWidth();
 						}
 						Thread.sleep(300);
-
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -206,20 +256,31 @@ public class ScreenTest {
 	public void setChannelPicture(String picturePath, boolean pip) {
 		try {
 			BufferedImage img = ImageIO.read(new File(picturePath));
+			GridBagConstraints c = new GridBagConstraints();
 			if (pip) {
-				img = resize(img, 384, 216);
+				img = resize(img, panelScreenPiP.getWidth(), panelScreenPiP.getHeight());
 				panelScreenPiP.remove(lblScreenPiPPicture);
 				lblScreenPiPPicture = new JLabel(new ImageIcon(img));
-				lblScreenPiPPicture.setBounds(0, 0, 384, 216);
-				panelScreenPiP.add(lblScreenPiPPicture);
-				panelScreenPiP.repaint();
+				c.fill = GridBagConstraints.BOTH;
+				c.weightx = 1.0;
+				c.weighty = 1.0;
+				c.gridx = 0;
+				c.gridy = 0;
+				panelScreenPiP.add(lblScreenPiPPicture, c);
+				panelScreenPiP.revalidate();
 			}
 			else {
 				panelScreenTV.remove(lblScreenTvPicture);
 				lblScreenTvPicture = new JLabel(new ImageIcon(img));
-				lblScreenTvPicture.setBounds(0, 0, 1280, 720);
-				panelScreenTV.add(lblScreenTvPicture);
-				panelScreenTV.repaint();
+				c.fill = GridBagConstraints.BOTH;
+				c.weightx = 1.0;
+				c.weighty = 1.0;
+				c.gridx = 0;
+				c.gridy = 0;
+				c.gridwidth = 5;
+				c.gridheight = 5;
+				panelScreenTV.add(lblScreenTvPicture, c);
+				panelScreenTV.revalidate();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -228,23 +289,35 @@ public class ScreenTest {
 
 	public void setChannelPicture(boolean zoom, String picturePath) {
 		try {
+			GridBagConstraints c = new GridBagConstraints();
 			if (zoom) {
 				BufferedImage img = ImageIO.read(new File(picturePath));
 				img = resize(img, (int) (img.getWidth() * 1.333333), (int) (img.getHeight() * 1.333333));
 				panelScreenTV.remove(lblScreenTvPicture);
-				lblScreenTvPicture = new JLabel(new ImageIcon(img));
-				lblScreenTvPicture.setBounds(0, 0, 1280, 720);
-				panelScreenTV.add(lblScreenTvPicture);
-				panelScreenTV.repaint();
+				c.fill = GridBagConstraints.BOTH;
+				c.weightx = 1.0;
+				c.weighty = 1.0;
+				c.gridx = 0;
+				c.gridy = 0;
+				c.gridwidth = 5;
+				c.gridheight = 5;
+				panelScreenTV.add(lblScreenTvPicture, c);
+				panelScreenTV.revalidate();
 			}
 			else {
 				BufferedImage img = ImageIO.read(new File(picturePath));
 				img = resize(img, img.getWidth(), img.getHeight());
 				panelScreenTV.remove(lblScreenTvPicture);
 				lblScreenTvPicture = new JLabel(new ImageIcon(img));
-				lblScreenTvPicture.setBounds(0, 0, 1280, 720);
-				panelScreenTV.add(lblScreenTvPicture);
-				panelScreenTV.repaint();
+				c.fill = GridBagConstraints.BOTH;
+				c.weightx = 1.0;
+				c.weighty = 1.0;
+				c.gridx = 0;
+				c.gridy = 0;
+				c.gridwidth = 5;
+				c.gridheight = 5;
+				panelScreenTV.add(lblScreenTvPicture, c);
+				panelScreenTV.revalidate();
 			}
 
 		} catch (IOException e) {

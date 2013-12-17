@@ -84,6 +84,7 @@ public class Screen {
 		progressBarScreenTimeshift.setMaximum(0);
 		progressBarScreenTimeshift.setBounds(0, 710, 1280, 10);
 		panelScreenTV.add(progressBarScreenTimeshift);
+		
 		panelScreenChannelinfo.setBounds(256, 720, 768, 128);
 		panelScreenTV.add(panelScreenChannelinfo);
 		panelScreenChannelinfo.setLayout(null);

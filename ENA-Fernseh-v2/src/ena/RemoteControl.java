@@ -33,7 +33,7 @@ public class RemoteControl {
 	private JPanel panelRemoteSettings;
 	private JPanel panelRemoteControl;
 
-	private Screen screen;
+	private ScreenTest screen;
 	private TvElectronics electronics;
 	private PersistentConfig config;
 	private PersistentChannel channel;
@@ -73,7 +73,7 @@ public class RemoteControl {
 	 * Create the application.
 	 */
 	public RemoteControl() {
-		screen = new Screen(this);
+		screen = new ScreenTest(this);
 		electronics = new TvElectronics(screen, this);
 		config = new PersistentConfig();
 		channel = new PersistentChannel(electronics);
@@ -400,6 +400,12 @@ public class RemoteControl {
 				btnSettingsChannelscan.setEnabled(true);
 				btnSettingsCancel.setEnabled(true);
 				progressBarSettingsChannelscan.setIndeterminate(false);
+				tableRemoteControlChannellist.setRowSelectionInterval(0, 0);
+				try {
+					config.setProgramm(0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 
@@ -466,7 +472,7 @@ public class RemoteControl {
 		btnRemoteControlTimeshiftFastforward.setEnabled(on);
 		tableRemoteControlChannellist.setEnabled(on);
 		try {
-			if(electronics.isRecording())
+			if (electronics.isRecording())
 				electronics.recordTimeShift(false);
 		} catch (Exception e) {
 			e.printStackTrace();

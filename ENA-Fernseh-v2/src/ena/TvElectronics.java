@@ -20,7 +20,7 @@ public class TvElectronics {
 
 	protected JPanel mainDisplay;
 	protected JPanel pipDisplay;
-	private Screen screen;
+	private ScreenTest screen;
 	private RemoteControl remote;
 	private boolean isPlaying = false;
 	private boolean isRecording = false; 		// der TimeShift-Recorder nimmt momentan auf
@@ -37,7 +37,7 @@ public class TvElectronics {
 	 * @param pipDisplay
 	 *            dieses Panel repräsentiert das PictureInPicture-Display
 	 */
-	TvElectronics(Screen screen, RemoteControl remote) {
+	TvElectronics(ScreenTest screen, RemoteControl remote) {
 		this.remote = remote;
 		this.screen = screen;
 		this.mainDisplay = screen.getScreen();

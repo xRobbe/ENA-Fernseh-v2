@@ -27,6 +27,7 @@ public class PersistentChannel {
 	}
 
 	public void readChannel() {
+		channelList.clear();
 		String line;
 		int i = 1;
 		try {
