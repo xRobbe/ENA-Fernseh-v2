@@ -233,10 +233,10 @@ public class ScreenTest {
 							lblScreenPiPPicture.setBounds(0, 0, (int) (panelScreenTV.getWidth() * 0.3), (int) (panelScreenTV.getHeight() * 0.3));
 							panelScreenPiP.add(lblScreenPiPPicture);
 							panelScreenPiP.setMaximumSize((new Dimension((int) (panelScreenTV.getWidth() * 0.3), (int) (panelScreenTV.getHeight() * 0.3))));
-							panelScreenTV.revalidate();
+							panelScreenPiP.revalidate();
 							
 						}
-						Thread.sleep(300);
+						Thread.sleep(30);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -376,18 +376,20 @@ public class ScreenTest {
 
 	private void movePanelUp(JPanel panel, int max, int min, boolean show) {
 		try {
-			int time = 300 / Math.abs(max - min);
+			int time = 3;
+			if(!(max-min == 0))
+				time = 300 / Math.abs(max - min);
 			if (show) {
 				panel.setVisible(true);
-				while (panel.getBounds().y > min) {
-					panel.setBounds(panel.getBounds().x, panel.getBounds().y - 1, panel.getBounds().width, panel.getBounds().height);
+//				while (panel.getBounds().y > min) {
+//					panel.setBounds(panel.getBounds().x, panel.getBounds().y - 1, panel.getBounds().width, panel.getBounds().height);
 					Thread.sleep(time);
-				}
+//				}
 			} else {
-				while (panel.getBounds().y < max) {
-					panel.setBounds(panel.getBounds().x, panel.getBounds().y + 1, panel.getBounds().width, panel.getBounds().height);
+//				while (panel.getBounds().y < max) {
+//					panel.setBounds(panel.getBounds().x, panel.getBounds().y + 1, panel.getBounds().width, panel.getBounds().height);
 					Thread.sleep(time);
-				}
+//				}
 				panel.setVisible(false);
 			}
 		} catch (Exception e) {
