@@ -74,7 +74,7 @@ public class RemoteControl {
 	 */
 	public RemoteControl() {
 		config = new PersistentConfig();
-		screen = new ScreenTest(this, config);
+		screen = new ScreenTest(this);
 		electronics = new TvElectronics(screen, this);
 		channel = new PersistentChannel(electronics);
 		initialize();

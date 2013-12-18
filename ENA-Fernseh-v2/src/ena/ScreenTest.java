@@ -55,8 +55,6 @@ public class ScreenTest {
 
 	private int pipChannel;
 
-	private PersistentConfig config;
-
 	// public static void main(String[] args) {
 	// EventQueue.invokeLater(new Runnable() {
 	// public void run() {
@@ -73,9 +71,8 @@ public class ScreenTest {
 	/**
 	 * Create the application.
 	 */
-	public ScreenTest(RemoteControl remote, PersistentConfig config) {
+	public ScreenTest(RemoteControl remote) {
 		this.remote = remote;
-		this.config = config;
 		initialize();
 	}
 
@@ -190,7 +187,7 @@ public class ScreenTest {
 					while (true) {
 						if (frame.isVisible()) {
 							BufferedImage img = null;
-							if (config.getRatio() >= 1) {
+							if (remote.getConfig().getRatio() >= 1) {
 								img = resize(ImageIO
 										.read(new File(remote
 												.getChannel()
