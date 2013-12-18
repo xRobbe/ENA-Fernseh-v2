@@ -73,9 +73,9 @@ public class RemoteControl {
 	 * Create the application.
 	 */
 	public RemoteControl() {
-		screen = new ScreenTest(this);
-		electronics = new TvElectronics(screen, this);
 		config = new PersistentConfig();
+		screen = new ScreenTest(this, config);
+		electronics = new TvElectronics(screen, this);
 		channel = new PersistentChannel(electronics);
 		initialize();
 		updateUsermodeLayout();
